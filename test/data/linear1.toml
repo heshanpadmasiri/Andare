@@ -1,1 +1,16 @@
 title = "TITLE"
+
+starting_quest = "quest_0"
+ending_quests = ["quest_1"]
+
+[[subquests]]
+name = "subquest_0"
+plot = ["str_1", "str_2"]
+end_type = "continue"
+next = "subquest_1"
+
+[[subquests]]
+name = "subquest_1"
+plot = ["str_3", "str_4"]
+end_type = "terminal"
+next = "placeholder"

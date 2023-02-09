@@ -4,7 +4,8 @@
 module Lib
     ( someFunc,
       readConfig,
-      Quest (..)
+      Quest (..),
+      SubQuest (..)
     ) where
 import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError)
 import GHC.RTS.Flags ()
@@ -12,22 +13,39 @@ import GHC.RTS.Flags ()
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
--- TODO: we need an array of things
--- TODO: change the toml and configuration to match an actual quest whith place holder text
 data Quest = Quest {
-   title:: String
+   title:: String,
+   starting_quest:: String,
+   ending_quests:: [String],
+   sub_quests:: [SubQuest]
 } deriving (Show, Eq)
 
--- data SubQuest = SubQuest {
---     thingTitle :: String,
---     thingField :: String
--- } deriving (Show)
+data SubQuest = SubQuest {
+    name:: String,
+    plot:: [String],
+    -- TODO: end type must be enum
+    end_type:: String,
+    -- TODO: should be optional
+    next:: String
+} deriving (Show, Eq)
 
 instance DecodeTOML Quest where
     tomlDecoder :: Decoder Quest
     tomlDecoder = 
         Quest
             <$> getField "title"
+            <*> getField "starting_quest"
+            <*> getField "ending_quests"
+            <*> getField "subquests"
+
+instance DecodeTOML SubQuest where
+    tomlDecoder :: Decoder SubQuest
+    tomlDecoder = 
+        SubQuest
+            <$> getField "name"
+            <*> getField "plot"
+            <*> getField "end_type"
+            <*> getField "next"
 
 readConfig:: FilePath -> IO (Either Quest TOMLError)
 readConfig path = do
