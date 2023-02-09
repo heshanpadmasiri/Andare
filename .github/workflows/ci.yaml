@@ -24,3 +24,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: freckle/stack-action@v3
+      - uses: freckle/weeder-action@v2
+        with:
+          ghc-version: ${{ steps.stack.outputs.compiler-version }}
+  hlint:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+
+      - name: 'Set up HLint'
+        uses: rwe/actions-hlint-setup@v1
+        with:
+          version: '3.1.6'
+
+      - name: 'Run HLint'
+        uses: rwe/actions-hlint-run@v2
+        with:
+          path: src/
+          fail-on: warning
