@@ -7,7 +7,7 @@ module Lib
       Quest (..),
       SubQuest (..)
     ) where
-import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError)
+import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError, getFieldOpt)
 import GHC.RTS.Flags ()
 
 someFunc :: IO ()
@@ -21,13 +21,13 @@ data Quest = Quest {
 } deriving (Show, Eq)
 
 data SubQuest = SubQuest {
-    name:: String,
+    name:: QuestId,
     plot:: [String],
-    -- TODO: end type must be enum
     end_type:: String,
-    -- TODO: should be optional
-    next:: String
+    next:: Maybe QuestId
 } deriving (Show, Eq)
+
+type QuestId = String;
 
 instance DecodeTOML Quest where
     tomlDecoder :: Decoder Quest
@@ -45,7 +45,7 @@ instance DecodeTOML SubQuest where
             <$> getField "name"
             <*> getField "plot"
             <*> getField "end_type"
-            <*> getField "next"
+            <*> getFieldOpt "next"
 
 readConfig:: FilePath -> IO (Either Quest TOMLError)
 readConfig path = do

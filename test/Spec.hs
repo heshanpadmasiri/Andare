@@ -7,6 +7,6 @@ main = hspec $ do
             let configPath = "./test/data/linear1.toml"
             config <- readConfig configPath
             config `shouldBe` Left (Quest "TITLE" "quest_0" ["quest_1"] [
-                                        (SubQuest "subquest_0" ["str_1", "str_2"] "continue" "subquest_1"),
-                                        (SubQuest "subquest_1" ["str_3", "str_4"] "terminal" "placeholder")
+                                        (SubQuest "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1")),
+                                        (SubQuest "subquest_1" ["str_3", "str_4"] "terminal" Nothing)
                                     ])

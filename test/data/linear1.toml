@@ -13,4 +13,3 @@ next = "subquest_1"
 name = "subquest_1"
 plot = ["str_3", "str_4"]
 end_type = "terminal"
-next = "placeholder"
