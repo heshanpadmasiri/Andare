@@ -3,4 +3,6 @@ module Main (main) where
 import Lib
 
 main :: IO ()
-main = someFunc
+main = do 
+    result <- readConfig "./test/data/linear1.toml"
+    print result
