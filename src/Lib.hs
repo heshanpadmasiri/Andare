@@ -2,25 +2,21 @@
 {-# LANGUAGE InstanceSigs #-}
 
 module Lib
-    ( someFunc,
-      readConfig,
-      Quest (..),
-      SubQuest (..)
+    ( readConfig,
+      QuestData (..),
+      SubQuestData (..)
     ) where
 import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError, getFieldOpt)
 import GHC.RTS.Flags ()
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
-
-data Quest = Quest {
+data QuestData = QuestData {
    title:: String,
    starting_quest:: String,
    ending_quests:: [String],
-   sub_quests:: [SubQuest]
+   sub_quests:: [SubQuestData]
 } deriving (Show, Eq)
 
-data SubQuest = SubQuest {
+data SubQuestData = SubQuestData {
     name:: QuestId,
     plot:: [String],
     end_type:: String,
@@ -29,27 +25,27 @@ data SubQuest = SubQuest {
 
 type QuestId = String;
 
-instance DecodeTOML Quest where
-    tomlDecoder :: Decoder Quest
+instance DecodeTOML QuestData where
+    tomlDecoder :: Decoder QuestData
     tomlDecoder = 
-        Quest
+        QuestData
             <$> getField "title"
             <*> getField "starting_quest"
             <*> getField "ending_quests"
             <*> getField "subquests"
 
-instance DecodeTOML SubQuest where
-    tomlDecoder :: Decoder SubQuest
+instance DecodeTOML SubQuestData where
+    tomlDecoder :: Decoder SubQuestData
     tomlDecoder = 
-        SubQuest
+        SubQuestData
             <$> getField "name"
             <*> getField "plot"
             <*> getField "end_type"
             <*> getFieldOpt "next"
 
-readConfig:: FilePath -> IO (Either Quest TOMLError)
+readConfig:: FilePath -> IO (Either QuestData TOMLError)
 readConfig path = do
     result <- decodeFile path
     case result of
-        Right cfg -> return (Left (cfg :: Quest))
+        Right cfg -> return (Left (cfg :: QuestData))
         Left e -> return (Right e)
