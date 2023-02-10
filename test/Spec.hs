@@ -1,5 +1,5 @@
 import Test.Hspec
-import Lib
+import Parsing
 main :: IO ()
 main = hspec $ do
     describe "parsing config files" $ do
