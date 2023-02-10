@@ -17,13 +17,11 @@ data QuestData = QuestData {
 } deriving (Show, Eq)
 
 data SubQuestData = SubQuestData {
-    name:: QuestId,
+    name:: String,
     plot:: [String],
     end_type:: String,
-    next:: Maybe QuestId
+    next:: Maybe String
 } deriving (Show, Eq)
-
-type QuestId = String;
 
 instance DecodeTOML QuestData where
     tomlDecoder :: Decoder QuestData

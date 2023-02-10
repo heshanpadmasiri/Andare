@@ -36,6 +36,7 @@ library
       base >=4.7 && <5
     , hspec
     , toml-reader
+    , unordered-containers
   default-language: Haskell2010
 
 executable Andare-exe
@@ -50,6 +51,7 @@ executable Andare-exe
     , base >=4.7 && <5
     , hspec
     , toml-reader
+    , unordered-containers
   default-language: Haskell2010
 
 test-suite Andare-test
@@ -65,4 +67,5 @@ test-suite Andare-test
     , base >=4.7 && <5
     , hspec
     , toml-reader
+    , unordered-containers
   default-language: Haskell2010
