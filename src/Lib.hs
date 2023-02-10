@@ -1,7 +1,8 @@
 module Lib
     (
         parseSubQuests,
-        SubQuest (..)
+        SubQuest (..),
+        ParseError (..)
     ) where
 
 import Parsing
@@ -19,7 +20,9 @@ data SubQuest = SubQuest {
     next:: Maybe SubQuest
 } deriving (Show, Eq)
 
-parseSubQuests:: [SubQuestData] -> [SubQuest]
+data ParseError = InvalidQuestId | FailedToParseSubQuest | FailedToParseNextQuest deriving(Show, Eq)
+
+parseSubQuests:: [SubQuestData] -> [Either ParseError SubQuest]
 parseSubQuests sub_quests_data = parsed_quests
     where
     quest_map = fromList (map (\each -> (name each, each)) sub_quests_data)
@@ -28,13 +31,16 @@ parseSubQuests sub_quests_data = parsed_quests
     parsed_quests = map quest_parser sub_quests_data
 
 -- return a proper error type
-parseSubQuest :: Data.HashMap.Internal.HashMap String SubQuestData -> SubQuestData -> SubQuest
+parseSubQuest :: Data.HashMap.Internal.HashMap String SubQuestData -> SubQuestData -> Either ParseError SubQuest
 parseSubQuest  quest_map sub_quest_data = sub_quest
     where
     sub_quest = case sub_quest_data of
-        SubQuestData _ p "continue"  (Just next_id) -> SubQuest p "continue" (Just (parseSubQuest quest_map child_quest_data)) 
-            where child_quest_data = case Data.HashMap.Strict.lookup next_id quest_map of
-                    Nothing -> error "failed to find quest by id"
-                    Just x -> x
-        SubQuestData _ p "terminal" Nothing -> SubQuest p "terminal" Nothing
-        _ -> error "failed to parse subquest"
+        SubQuestData _ p "continue"  (Just next_id) -> next_lookup where
+            next_lookup = case Data.HashMap.Strict.lookup next_id quest_map of
+                            Nothing -> Left InvalidQuestId
+                            Just next_quest -> r1 where
+                                r1 = case parseSubQuest quest_map next_quest of
+                                    Left _ -> Left FailedToParseNextQuest
+                                    Right s -> Right (SubQuest p "continue" (Just s))
+        SubQuestData _ p "terminal" Nothing -> Right (SubQuest p "terminal" Nothing)
+        _ -> Left FailedToParseSubQuest
