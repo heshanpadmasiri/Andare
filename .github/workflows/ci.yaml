@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: main
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        runner:
+          - ubuntu-latest
+          - macOS-latest
+
+        resolver:
+          - nightly   # ghc-9.4 (as of writing)
+          - lts       # ghc-9.2 (as of writing)
+
+      fail-fast: true
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: freckle/stack-cache-action@v2
+      - id: stack
+        uses: freckle/stack-action@v3
+      - uses: freckle/weeder-action@v2
+        with:
+          ghc-version: ${{ steps.stack.outputs.compiler-version }}
+  hlint:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+
+      - name: 'Set up HLint'
+        uses: rwe/actions-hlint-setup@v1
+        with:
+          version: '3.1.6'
+
+      - name: 'Run HLint'
+        uses: rwe/actions-hlint-run@v2
+        with:
+          path: src/
+          fail-on: warning
