@@ -36,5 +36,5 @@ parseSubQuest  quest_map sub_quest_data = sub_quest
             where child_quest_data = case Data.HashMap.Strict.lookup next_id quest_map of
                     Nothing -> error "failed to find quest by id"
                     Just x -> x
-        SubQuestData _ p "terminal"  _ -> SubQuest p "terminal" Nothing
+        SubQuestData _ p "terminal" Nothing -> SubQuest p "terminal" Nothing
         _ -> error "failed to parse subquest"

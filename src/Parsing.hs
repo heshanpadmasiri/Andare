@@ -41,9 +41,9 @@ instance DecodeTOML SubQuestData where
             <*> getField "end_type"
             <*> getFieldOpt "next"
 
-readConfig:: FilePath -> IO (Either QuestData TOMLError)
+readConfig:: FilePath -> IO (Either TOMLError QuestData)
 readConfig path = do
     result <- decodeFile path
     case result of
-        Right cfg -> return (Left (cfg :: QuestData))
-        Left e -> return (Right e)
+        Right cfg -> return (Right (cfg :: QuestData))
+        Left e -> return (Left e)
