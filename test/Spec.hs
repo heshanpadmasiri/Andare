@@ -47,7 +47,7 @@ main = hspec $ do
                         ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_non_existing",
                         TerminalSubQuestData "subquest_1" ["str_3", "str_4"]
                     ]
-           let sub_quest_0 = InvalidQuestId
+           let sub_quest_0 = FailedToParseNextQuest
            let sub_quest_1 = TerminalSubQuest ["str_3", "str_4"]
            parseSubQuests sq `shouldBe` [Left sub_quest_0, Right sub_quest_1]
 
@@ -56,7 +56,7 @@ main = hspec $ do
                         ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_non_existing",
                         ContinueSubQuestData "subquest_1" ["str_3", "str_4"] "subquest_0"
                     ]
-           let sub_quest_0 = InvalidQuestId
+           let sub_quest_0 = FailedToParseNextQuest
            let sub_quest_1 = FailedToParseNextQuest
            parseSubQuests sq `shouldBe` [Left sub_quest_0, Left sub_quest_1]
 
