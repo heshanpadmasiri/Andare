@@ -1,7 +1,7 @@
 title = "TITLE"
 
-starting_quest = "quest_0"
-ending_quests = ["quest_1"]
+starting_quest = "subquest_0"
+ending_quests = ["subquest_1"]
 
 [[subquests]]
 name = "subquest_0"
