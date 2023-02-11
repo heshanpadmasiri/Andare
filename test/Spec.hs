@@ -3,7 +3,18 @@ import Parsing
 import Lib
 main :: IO ()
 main = hspec $ do
-    describe "parsing config files" $ do
+    describe "parsing branching configs" $ do
+        it "can parse branching config file" $ do
+            config <- readConfig "./test/data/branching1.toml"
+            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_3"] [
+                                        BranchingSubQuestData "subquest_0" ["..", ".."] [("prompt_1", "subquest_1"),
+                                                                                         ("prompt_2", "subquest_2")],
+                                        ContinueSubQuestData "subquest_1" [".."] "subquest_3",
+                                        ContinueSubQuestData "subquest_2" [".."] "subquest_3",
+                                        TerminalSubQuestData "subquest_3" [".."]
+                                    ])
+
+    describe "parsing linear configs" $ do
         it "can read fixed linear quest" $ do
             let configPath = "./test/data/linear1.toml"
             config <- readConfig configPath

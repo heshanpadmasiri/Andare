@@ -1,0 +1,27 @@
+title = "TITLE"
+
+starting_quest = "subquest_0"
+ending_quests = ["subquest_3"]
+
+[[subquests]] # starting_point
+name = "subquest_0"
+plot = ["..", ".."]
+end_type = "player_choice"
+next = [["prompt_1", "subquest_1"], ["prompt_2", "subquest_2"]]
+
+[[subquests]]
+name = "subquest_1"
+plot = [".."]
+end_type = "continue"
+next = "subquest_3"
+
+[[subquests]]
+name = "subquest_2"
+plot = [".."]
+end_type = "continue"
+next = "subquest_3"
+
+[[subquests]]
+name = "subquest_3"
+plot = [".."]
+end_type = "terminal"

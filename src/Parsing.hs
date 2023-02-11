@@ -18,12 +18,14 @@ data QuestData = QuestData {
 } deriving (Show, Eq)
 
 data SubQuestData = ContinueSubQuestData String [String] String
-                    | TerminalSubQuestData String [String] deriving(Show, Eq)
+                    | TerminalSubQuestData String [String]
+                    | BranchingSubQuestData String [String] [(String, String)] deriving(Show, Eq)
 
 name:: SubQuestData -> String
 name sq = case sq of 
     TerminalSubQuestData n _ -> n
     ContinueSubQuestData n _ _ -> n
+    BranchingSubQuestData n _ _ -> n
 
 instance DecodeTOML QuestData where
     tomlDecoder :: Decoder QuestData
@@ -43,10 +45,14 @@ instance DecodeTOML SubQuestData where
                             <$> getField "name"
                             <*> getField "plot"
                             <*> getField "next"
+            "player_choice" -> BranchingSubQuestData
+                            <$> getField "name"
+                            <*> getField "plot"
+                            <*> getField "next"
             "terminal" -> TerminalSubQuestData
                             <$> getField "name"
                             <*> getField "plot"
-            _ -> fail $ "Invalid end_type" <> end_type
+            _ -> fail $ "Invalid end_type " <> end_type
 
 readConfig:: FilePath -> IO (Either TOMLError QuestData)
 readConfig path = do
