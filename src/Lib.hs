@@ -16,11 +16,7 @@ data Quest = Quest {
     starting_quest:: SubQuest
 } deriving (Show, Eq)
 
-data SubQuest = SubQuest {
-    plot:: [String],
-    end_type:: String,
-    next:: Maybe SubQuest
-} deriving (Show, Eq)
+data SubQuest = ContinueSubQuest [String] SubQuest | TerminalSubQuest [String] deriving(Show, Eq)
 
 parseQuest:: QuestData -> Either ParseError Quest
 parseQuest quest_data = quest
@@ -35,7 +31,8 @@ findSubQuestByTitle:: String -> [(SubQuestData, Either ParseError SubQuest)] -> 
 findSubQuestByTitle _ [] = Left InvalidQuestId
 findSubQuestByTitle expected_title (x:xs) = case x of
                 (_, Left err) -> Left err
-                (SubQuestData cur_title _ _ _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
+                (TerminalSubQuestData cur_title _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
+                (ContinueSubQuestData cur_title _ _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
 
 data ParseError = InvalidQuestId | FailedToParseSubQuest | FailedToParseNextQuest deriving(Show, Eq)
 
@@ -50,12 +47,11 @@ parseSubQuest :: Data.HashMap.Internal.HashMap String SubQuestData -> SubQuestDa
 parseSubQuest  quest_map sub_quest_data = sub_quest
     where
     sub_quest = case sub_quest_data of
-        SubQuestData _ p "continue"  (Just next_id) -> next_lookup where
+        ContinueSubQuestData _ p next_id -> next_lookup where
             next_lookup = case Data.HashMap.Strict.lookup next_id quest_map of
                             Nothing -> Left InvalidQuestId
                             Just next_quest -> r1 where
                                 r1 = case parseSubQuest quest_map next_quest of
                                     Left _ -> Left FailedToParseNextQuest
-                                    Right s -> Right (SubQuest p "continue" (Just s))
-        SubQuestData _ p "terminal" Nothing -> Right (SubQuest p "terminal" Nothing)
-        _ -> Left FailedToParseSubQuest
+                                    Right s -> Right (ContinueSubQuest p s)
+        TerminalSubQuestData _ p -> Right (TerminalSubQuest p)
