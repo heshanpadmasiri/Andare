@@ -21,8 +21,8 @@ main = do
     putStrLn "END"
 
 runSubQuest:: SubQuest -> IO () 
-runSubQuest (SubQuest p _ Nothing) = mapM_ putStrLn p
-runSubQuest (SubQuest p _ (Just nq)) = do
+runSubQuest (TerminalSubQuest p) = mapM_ putStrLn p
+runSubQuest (ContinueSubQuest p nq) = do
         mapM_ putStrLn p
         putStrLn "press enter to continue"
         _ <- getLine

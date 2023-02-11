@@ -4,9 +4,10 @@
 module Parsing
     ( readConfig,
       QuestData (..),
-      SubQuestData (..)
+      SubQuestData (..),
+      name
     ) where
-import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError, getFieldOpt)
+import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError)
 import GHC.RTS.Flags ()
 
 data QuestData = QuestData {
@@ -16,12 +17,13 @@ data QuestData = QuestData {
    sub_quests:: [SubQuestData]
 } deriving (Show, Eq)
 
-data SubQuestData = SubQuestData {
-    name:: String,
-    plot:: [String],
-    end_type:: String,
-    next:: Maybe String
-} deriving (Show, Eq)
+data SubQuestData = ContinueSubQuestData String [String] String
+                    | TerminalSubQuestData String [String] deriving(Show, Eq)
+
+name:: SubQuestData -> String
+name sq = case sq of 
+    TerminalSubQuestData n _ -> n
+    ContinueSubQuestData n _ _ -> n
 
 instance DecodeTOML QuestData where
     tomlDecoder :: Decoder QuestData
@@ -33,13 +35,18 @@ instance DecodeTOML QuestData where
             <*> getField "subquests"
 
 instance DecodeTOML SubQuestData where
-    tomlDecoder :: Decoder SubQuestData
-    tomlDecoder = 
-        SubQuestData
-            <$> getField "name"
-            <*> getField "plot"
-            <*> getField "end_type"
-            <*> getFieldOpt "next"
+    tomlDecoder:: Decoder SubQuestData
+    tomlDecoder = do
+        end_type <- getField "end_type"
+        case end_type of
+            "continue" -> ContinueSubQuestData 
+                            <$> getField "name"
+                            <*> getField "plot"
+                            <*> getField "next"
+            "terminal" -> TerminalSubQuestData
+                            <$> getField "name"
+                            <*> getField "plot"
+            _ -> fail $ "Invalid end_type" <> end_type
 
 readConfig:: FilePath -> IO (Either TOMLError QuestData)
 readConfig path = do
