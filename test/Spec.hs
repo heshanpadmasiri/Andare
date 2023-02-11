@@ -7,7 +7,7 @@ main = hspec $ do
         it "can read fixed linear quest" $ do
             let configPath = "./test/data/linear1.toml"
             config <- readConfig configPath
-            config `shouldBe` Right (QuestData "TITLE" "quest_0" ["quest_1"] [
+            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_1"] [
                                         SubQuestData "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1"),
                                         SubQuestData "subquest_1" ["str_3", "str_4"] "terminal" Nothing
                                     ])
@@ -17,8 +17,13 @@ main = hspec $ do
             let sub_quest_1 = SubQuest ["str_3", "str_4"] "terminal" Nothing
             let sub_quest_0 = SubQuest ["str_1", "str_2"] "continue" (Just sub_quest_1)
             result `shouldBe` Just [Right sub_quest_0, Right sub_quest_1]
+            let quest = case config of
+                            Right q -> Just (parseQuest q)
+                            _ -> Nothing
+            print quest
+            quest `shouldBe` Just (Right (Quest "TITLE" sub_quest_0))
 
-        it "can parse fixed linear quest" $ do
+        it "can parse fixed linear quest sub quests" $ do
             let sq = [
                         SubQuestData "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1"),
                         SubQuestData "subquest_1" ["str_3", "str_4"] "terminal" Nothing
@@ -53,3 +58,23 @@ main = hspec $ do
            let sub_quest_0 = InvalidQuestId
            let sub_quest_1 = FailedToParseNextQuest
            parseSubQuests sq `shouldBe` [Left sub_quest_0, Left sub_quest_1]
+
+        it "correctly parse quest data" $ do
+           let qd = QuestData "TITLE" "subquest_0" ["subquest_1"] [SubQuestData "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1"),
+                                                                   SubQuestData "subquest_1" ["str_3", "str_4"] "terminal" Nothing]
+           let sub_quest_1 = SubQuest ["str_3", "str_4"] "terminal" Nothing
+           let sub_quest_0 = SubQuest ["str_1", "str_2"] "continue" (Just sub_quest_1)
+           parseQuest qd `shouldBe` Right (Quest "TITLE" sub_quest_0)
+
+        it "correctly cascade errors to parsing quests" $ do
+           let qd = QuestData "TITLE" "subquest_0" ["subquest_1"] [SubQuestData "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1"),
+                                                                   SubQuestData "subquest_1" ["str_3", "str_4"] "terminal" (Just "nonexisting")]
+           parseQuest qd `shouldBe` Left FailedToParseNextQuest
+           let qd_1 = QuestData "TITLE" "subquest_0" ["subquest_1"] [SubQuestData "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1"),
+                                                                     SubQuestData "subquest_1" ["str_3", "str_4"] "continue" (Just "nonexisting")]
+           parseQuest qd_1 `shouldBe` Left FailedToParseNextQuest
+
+        it "correctly detect invalid starting quest ids" $ do
+           let qd = QuestData "TITLE" "none_existing" ["subquest_1"] [SubQuestData "subquest_0" ["str_1", "str_2"] "continue" (Just "subquest_1"),
+                                                                      SubQuestData "subquest_1" ["str_3", "str_4"] "terminal" Nothing]
+           parseQuest qd `shouldBe` Left InvalidQuestId
