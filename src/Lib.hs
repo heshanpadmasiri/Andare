@@ -18,7 +18,8 @@ data Quest = Quest {
 
 data SubQuest = ContinueSubQuest [String] SubQuest |
                 TerminalSubQuest [String] |
-                BranchingSubQuest [String] [(String, SubQuest)] deriving(Show, Eq)
+                BranchingSubQuest [String] [(String, SubQuest)] |
+                RandomizedSubQuest [String] [(Double, SubQuest)] deriving(Show, Eq)
 
 parseQuest:: QuestData -> Either ParseError Quest
 parseQuest quest_data = quest
@@ -36,8 +37,9 @@ findSubQuestByTitle expected_title (x:xs) = case x of
                 (TerminalSubQuestData cur_title _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
                 (ContinueSubQuestData cur_title _ _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
                 (BranchingSubQuestData cur_title _ _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
+                (RandomizedSubQuestData cur_title _ _, quest) -> if cur_title == expected_title then quest else findSubQuestByTitle expected_title xs
 
-data ParseError = InvalidQuestId | FailedToParseSubQuest | FailedToParseNextQuest deriving(Show, Eq)
+data ParseError = InvalidQuestId | FailedToParseSubQuest | FailedToParseNextQuest | RandomEventProbablitiesInvalid deriving(Show, Eq)
 
 parseSubQuests:: [SubQuestData] -> [Either ParseError SubQuest]
 parseSubQuests sub_quests_data = parsed_quests
@@ -56,9 +58,14 @@ parseSubQuest  quest_map sub_quest_data = sub_quest
         BranchingSubQuestData _ p prompts -> case parseChoices quest_map prompts of
                 Left _ -> Left FailedToParseNextQuest
                 Right choices -> Right (BranchingSubQuest p choices)
+        RandomizedSubQuestData _ p events -> if validateProbs events
+            then case parseChoices quest_map events of
+                 Left _ -> Left FailedToParseNextQuest
+                 Right outcomes -> Right (RandomizedSubQuest p outcomes)
+            else Left RandomEventProbablitiesInvalid
         TerminalSubQuestData _ p -> Right (TerminalSubQuest p)
 
-parseChoices :: Data.HashMap.Internal.HashMap String SubQuestData -> [(String, String)] -> Either ParseError [(String, SubQuest)]
+parseChoices :: Data.HashMap.Internal.HashMap String SubQuestData -> [(a, String)] -> Either ParseError [(a, SubQuest)]
 parseChoices _ [] = Right []
 parseChoices quest_map (d:ds) = result where
             prompt = fst d
@@ -73,3 +80,12 @@ getSubQuestByTitle:: Data.HashMap.Internal.HashMap String SubQuestData -> String
 getSubQuestByTitle quest_map t = case Data.HashMap.Strict.lookup t quest_map of        
                                             Nothing -> Left InvalidQuestId
                                             Just sqd -> parseSubQuest quest_map sqd
+
+validateProbs:: [(Double, a)] -> Bool
+validateProbs d = result where
+    probs = map fst d
+    min_prob = minimum probs
+    prob_sum = sum probs
+    is_probs_positive = min_prob >= 0.0
+    is_sum_valid = (prob_sum >= 1.0) && (prob_sum <= 1.0)
+    result = is_probs_positive && is_sum_valid
