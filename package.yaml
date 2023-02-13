@@ -24,6 +24,7 @@ dependencies:
 - toml-reader
 - hspec
 - unordered-containers
+- random
 
 ghc-options:
 - -Wall

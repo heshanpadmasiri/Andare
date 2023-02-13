@@ -9,9 +9,9 @@ main = hspec $ do
             config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_3"] [
                                         RandomizedSubQuestData "subquest_0" ["..", ".."] [(0.5, "subquest_1"),
                                                                                           (0.5, "subquest_2")],
-                                        ContinueSubQuestData "subquest_1" [".."] "subquest_3",
-                                        ContinueSubQuestData "subquest_2" [".."] "subquest_3",
-                                        TerminalSubQuestData "subquest_3" [".."]
+                                        ContinueSubQuestData "subquest_1" ["1"] "subquest_3",
+                                        ContinueSubQuestData "subquest_2" ["2"] "subquest_3",
+                                        TerminalSubQuestData "subquest_3" ["end"]
                                     ])
         it "can parse random config" $ do
             let sq = [RandomizedSubQuestData "subquest_0" ["..", ".."] [(0.5, "subquest_1"),

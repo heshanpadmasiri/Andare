@@ -3,6 +3,7 @@ module Main (main) where
 import Parsing (readConfig)
 import Lib
 import System.Environment (getArgs)
+import System.Random
 
 
 data RuntimeErr = FailedToReadConfig|FailedToParseConfig deriving(Show)
@@ -31,8 +32,12 @@ runSubQuest (BranchingSubQuest p c) = do
     mapM_ putStrLn p
     nq <- getChoice c
     runSubQuest nq
-runSubQuest (RandomizedSubQuest _ _ ) = putStrLn "Randomized sub quests not implemented"
-                            
+runSubQuest (RandomizedSubQuest p c) = do
+    mapM_ putStrLn p
+    putStrLn "random event press enter to continue"
+    seed <- randomIO :: IO Double
+    runSubQuest (pickChoice c seed)
+
 getChoice:: [(String, SubQuest)] -> IO SubQuest
 getChoice choices = do
     putStrLn "PICK:"
@@ -57,3 +62,8 @@ createPrompts (x:xs) i = res where
     l = "\t[" ++ show i ++ "]: " ++ fst x
     res = l : createPrompts xs (i+1)
     
+pickChoice:: [(Double, SubQuest)] -> Double -> SubQuest
+pickChoice [] _ = error "UNEXPECTED: failed to randomly pick a sub quest"
+pickChoice (x:xs) v = if cur >= v then curQuest else pickChoice xs (v-cur) where
+    cur = fst x
+    curQuest = snd x
