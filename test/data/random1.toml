@@ -11,17 +11,17 @@ next = [[0.5, "subquest_1"], [0.5, "subquest_2"]]
 
 [[subquests]]
 name = "subquest_1"
-plot = [".."]
+plot = ["1"]
 end_type = "continue"
 next = "subquest_3"
 
 [[subquests]]
 name = "subquest_2"
-plot = [".."]
+plot = ["2"]
 end_type = "continue"
 next = "subquest_3"
 
 [[subquests]]
 name = "subquest_3"
-plot = [".."]
+plot = ["end"]
 end_type = "terminal"
