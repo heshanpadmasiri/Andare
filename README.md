@@ -24,7 +24,8 @@ next = "subquest_5"
 name = "subquest_6"
 plot = [".."]
 end_type = "random_event"
-next = [["0.7", "subquest_3"], ["0.2", "subquest_4"]]
+# I am not sure this part is valid TOML but we can parse this
+next = [[0.7, "subquest_3"], [0.2, "subquest_4"]]
 
 ...
 

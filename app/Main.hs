@@ -31,6 +31,7 @@ runSubQuest (BranchingSubQuest p c) = do
     mapM_ putStrLn p
     nq <- getChoice c
     runSubQuest nq
+runSubQuest (RandomizedSubQuest _ _ ) = putStrLn "Randomized sub quests not implemented"
                             
 getChoice:: [(String, SubQuest)] -> IO SubQuest
 getChoice choices = do

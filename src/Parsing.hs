@@ -19,13 +19,15 @@ data QuestData = QuestData {
 
 data SubQuestData = ContinueSubQuestData String [String] String
                     | TerminalSubQuestData String [String]
-                    | BranchingSubQuestData String [String] [(String, String)] deriving(Show, Eq)
+                    | BranchingSubQuestData String [String] [(String, String)] 
+                    | RandomizedSubQuestData String [String] [(Double, String)] deriving(Show, Eq)
 
 name:: SubQuestData -> String
 name sq = case sq of 
     TerminalSubQuestData n _ -> n
     ContinueSubQuestData n _ _ -> n
     BranchingSubQuestData n _ _ -> n
+    RandomizedSubQuestData n _ _ -> n
 
 instance DecodeTOML QuestData where
     tomlDecoder :: Decoder QuestData
@@ -46,6 +48,10 @@ instance DecodeTOML SubQuestData where
                             <*> getField "plot"
                             <*> getField "next"
             "player_choice" -> BranchingSubQuestData
+                            <$> getField "name"
+                            <*> getField "plot"
+                            <*> getField "next"
+            "random_event" -> RandomizedSubQuestData
                             <$> getField "name"
                             <*> getField "plot"
                             <*> getField "next"
