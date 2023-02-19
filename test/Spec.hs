@@ -101,7 +101,7 @@ main = hspec $ do
             let quest = case config of
                             Right q -> Just (parseQuest q)
                             _ -> Nothing
-            quest `shouldBe` Just (Right (Quest "TITLE" sub_quest_0))
+            quest `shouldBe` Just (Right (Quest "TITLE" Nothing sub_quest_0))
 
         it "can parse fixed linear quest sub quests" $ do
             let sq = [
@@ -135,7 +135,7 @@ main = hspec $ do
                                                                            TerminalSubQuestData "subquest_1" ["str_3", "str_4"]]
            let sub_quest_1 = TerminalSubQuest ["str_3", "str_4"]
            let sub_quest_0 = ContinueSubQuest ["str_1", "str_2"] sub_quest_1
-           parseQuest qd `shouldBe` Right (Quest "TITLE" sub_quest_0)
+           parseQuest qd `shouldBe` Right (Quest "TITLE" Nothing sub_quest_0)
 
         it "correctly cascade errors to parsing quests" $ do
            let qd_1 = QuestData "TITLE" "subquest_0" ["subquest_1"] Nothing [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
