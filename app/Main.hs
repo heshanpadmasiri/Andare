@@ -18,25 +18,31 @@ main = do
                                 Right q -> Right q
     case result of
         Left err -> print err
-        Right quest -> runSubQuest (starting_quest quest)
+        Right quest -> runQuest quest
     putStrLn "END"
 
-runSubQuest:: SubQuest -> IO () 
-runSubQuest (TerminalSubQuest p) = mapM_ putStrLn p
+runQuest:: Quest -> IO ()
+runQuest q = runSubQuest (starting_quest q)
+
+runSubQuest:: SubQuest -> IO ()
+runSubQuest (TerminalSubQuest p) = printPlot p
 runSubQuest (ContinueSubQuest p nq) = do
-    mapM_ putStrLn p
+    printPlot p
     putStrLn "press enter to continue"
     _ <- getLine
     runSubQuest nq
 runSubQuest (BranchingSubQuest p c) = do
-    mapM_ putStrLn p
+    printPlot p
     nq <- getChoice c
     runSubQuest nq
 runSubQuest (RandomizedSubQuest p c) = do
-    mapM_ putStrLn p
+    printPlot p
     putStrLn "random event press enter to continue"
     seed <- randomIO :: IO Double
     runSubQuest (pickChoice c seed)
+
+printPlot:: [String] -> IO ()
+printPlot p  = mapM_ putStrLn p
 
 getChoice:: [(String, SubQuest)] -> IO SubQuest
 getChoice choices = do
