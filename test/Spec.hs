@@ -16,7 +16,6 @@ main = hspec $ do
                         TerminalSubQuestData "subquest_1" ["str_3 {var} str_3_rest", "{var} str_4"]
                      ]
             parseQuest qd `shouldBe` Right (Quest "TITLE" (Just ["a"]) (ContinueSubQuest ["{var}", "str_2 {var}"] (TerminalSubQuest ["str_3 {var} str_3_rest", "{var} str_4"])))
-        -- TODO: test case without a filler value
 
     describe "parsing random configs" $ do
         it "can read random config file" $ do
