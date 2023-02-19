@@ -13,6 +13,7 @@ import Data.HashMap.Strict (fromList, lookup)
 
 data Quest = Quest {
     title:: String,
+    vars:: Maybe [String],
     starting_quest:: SubQuest
 } deriving (Show, Eq)
 
@@ -28,7 +29,7 @@ parseQuest quest_data = quest
     parsed_sub_quests = parseSubQuests sub_quest_data
     quest = case findSubQuestByTitle (Parsing.starting_quest quest_data) (zip sub_quest_data parsed_sub_quests) of
         Left err -> Left err
-        Right sq -> Right (Quest (Parsing.title quest_data) sq)
+        Right sq -> Right (Quest (Parsing.title quest_data) (Parsing.vars quest_data) sq)
 
 findSubQuestByTitle:: String -> [(SubQuestData, Either ParseError SubQuest)] -> Either ParseError SubQuest
 findSubQuestByTitle _ [] = Left InvalidQuestId
