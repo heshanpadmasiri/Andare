@@ -7,13 +7,14 @@ module Parsing
       SubQuestData (..),
       name
     ) where
-import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError)
+import TOML (DecodeTOML, tomlDecoder, getField, decodeFile, Decoder, TOMLError, getFieldOpt)
 import GHC.RTS.Flags ()
 
 data QuestData = QuestData {
    title:: String,
    starting_quest:: String,
    ending_quests:: [String],
+   vars:: Maybe [String],
    sub_quests:: [SubQuestData]
 } deriving (Show, Eq)
 
@@ -36,6 +37,7 @@ instance DecodeTOML QuestData where
             <$> getField "title"
             <*> getField "starting_quest"
             <*> getField "ending_quests"
+            <*> getFieldOpt "vars"
             <*> getField "subquests"
 
 instance DecodeTOML SubQuestData where

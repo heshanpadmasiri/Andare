@@ -3,10 +3,18 @@ import Parsing
 import Lib
 main :: IO ()
 main = hspec $ do
+    describe "parsing vars in config" $ do
+        it "can read config file with vars" $ do
+            config <- readConfig "./test/data/var_sub.toml"
+            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_1"] (Just  ["a", "b"]) [
+                                        ContinueSubQuestData "subquest_0" ["{var}", "str_2 {var}"] "subquest_1",
+                                        TerminalSubQuestData "subquest_1" ["str_3 {var} str_3_rest", "{var} str_4"]
+                                    ])
+
     describe "parsing random configs" $ do
         it "can read random config file" $ do
             config <- readConfig "./test/data/random1.toml"
-            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_3"] [
+            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_3"] Nothing [
                                         RandomizedSubQuestData "subquest_0" ["..", ".."] [(0.5, "subquest_1"),
                                                                                           (0.5, "subquest_2")],
                                         ContinueSubQuestData "subquest_1" ["1"] "subquest_3",
@@ -50,7 +58,7 @@ main = hspec $ do
     describe "parsing branching configs" $ do
         it "can read branching config file" $ do
             config <- readConfig "./test/data/branching1.toml"
-            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_3"] [
+            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_3"] Nothing [
                                         BranchingSubQuestData "subquest_0" ["..", ".."] [("prompt_1", "subquest_1"),
                                                                                          ("prompt_2", "subquest_2")],
                                         ContinueSubQuestData "subquest_1" [".."] "subquest_3",
@@ -73,12 +81,12 @@ main = hspec $ do
         it "can read fixed linear quest" $ do
             let configPath = "./test/data/linear1.toml"
             config <- readConfig configPath
-            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_1"] [
+            config `shouldBe` Right (QuestData "TITLE" "subquest_0" ["subquest_1"] Nothing [
                                         ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
                                         TerminalSubQuestData "subquest_1" ["str_3", "str_4"]
                                     ])
             let result = case config of
-                            Right (QuestData _ _ _ sq) -> Just (parseSubQuests sq)
+                            Right (QuestData _ _ _ _ sq) -> Just (parseSubQuests sq)
                             _ -> Nothing
             let sub_quest_1 = TerminalSubQuest ["str_3", "str_4"]
             let sub_quest_0 = ContinueSubQuest ["str_1", "str_2"] sub_quest_1
@@ -116,18 +124,18 @@ main = hspec $ do
            parseSubQuests sq `shouldBe` [Left sub_quest_0, Left sub_quest_1]
 
         it "correctly parse quest data" $ do
-           let qd = QuestData "TITLE" "subquest_0" ["subquest_1"] [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
-                                                                   TerminalSubQuestData "subquest_1" ["str_3", "str_4"]]
+           let qd = QuestData "TITLE" "subquest_0" ["subquest_1"] Nothing [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
+                                                                           TerminalSubQuestData "subquest_1" ["str_3", "str_4"]]
            let sub_quest_1 = TerminalSubQuest ["str_3", "str_4"]
            let sub_quest_0 = ContinueSubQuest ["str_1", "str_2"] sub_quest_1
            parseQuest qd `shouldBe` Right (Quest "TITLE" sub_quest_0)
 
         it "correctly cascade errors to parsing quests" $ do
-           let qd_1 = QuestData "TITLE" "subquest_0" ["subquest_1"] [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
-                                                                     ContinueSubQuestData "subquest_1" ["str_3", "str_4"] "nonexisting"]
+           let qd_1 = QuestData "TITLE" "subquest_0" ["subquest_1"] Nothing [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
+                                                                             ContinueSubQuestData "subquest_1" ["str_3", "str_4"] "nonexisting"]
            parseQuest qd_1 `shouldBe` Left FailedToParseNextQuest
 
         it "correctly detect invalid starting quest ids" $ do
-           let qd = QuestData "TITLE" "none_existing" ["subquest_1"] [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
-                                                                      TerminalSubQuestData "subquest_1" ["str_3", "str_4"]]
+           let qd = QuestData "TITLE" "none_existing" ["subquest_1"] Nothing [ContinueSubQuestData "subquest_0" ["str_1", "str_2"] "subquest_1",
+                                                                              TerminalSubQuestData "subquest_1" ["str_3", "str_4"]]
            parseQuest qd `shouldBe` Left InvalidQuestId
